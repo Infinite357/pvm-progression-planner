@@ -1,4 +1,4 @@
-,.[]-\/package com.pvmplanner.backend.model;
+package com.pvmplanner.backend.model;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
