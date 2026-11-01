@@ -1,9 +1,9 @@
 package com.pvmplanner.backend.service;
 
+import com.pvmplanner.backend.dto.SaveProfileRequest;
 import com.pvmplanner.backend.model.PlayerProfile;
 import com.pvmplanner.backend.repository.PlayerProfileRepository;
 import org.springframework.stereotype.Service;
-import com.pvmplanner.backend.dto.SaveProfileRequest;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,16 +22,7 @@ public class PlayerProfileService {
 
         PlayerProfile playerProfile = new PlayerProfile();
 
-        playerProfile.setRsn(request.getRsn().trim());
-        playerProfile.setAttack(request.getAttack());
-        playerProfile.setDefence(request.getDefence());
-        playerProfile.setStrength(request.getStrength());
-        playerProfile.setRanged(request.getRanged());
-        playerProfile.setMagic(request.getMagic());
-        playerProfile.setPrayer(request.getPrayer());
-        playerProfile.setNecromancy(request.getNecromancy());
-        playerProfile.setHerblore(request.getHerblore());
-        playerProfile.setSummoning(request.getSummoning());
+        applyProfileRequest(playerProfile, request);
 
         return playerProfileRepository.save(playerProfile);
     }
@@ -70,8 +61,8 @@ public class PlayerProfileService {
         validateSkillLevel("Prayer", playerProfile.getPrayer());
     }
 
-public Optional<PlayerProfile> updateProfile(
-        Long id, SaveProfileRequest requestedProfile) {
+    public Optional<PlayerProfile> updateProfile(
+            Long id, SaveProfileRequest requestedProfile) {
 
         Optional<PlayerProfile> playerProfile = playerProfileRepository.findById(id);
 
@@ -81,18 +72,24 @@ public Optional<PlayerProfile> updateProfile(
 
         validateProfile(requestedProfile);
 
-        playerProfile.get().setRsn(requestedProfile.getRsn().trim());
-        playerProfile.get().setAttack(requestedProfile.getAttack());
-        playerProfile.get().setStrength(requestedProfile.getStrength());
-        playerProfile.get().setDefence(requestedProfile.getDefence());
-        playerProfile.get().setRanged(requestedProfile.getRanged());
-        playerProfile.get().setNecromancy(requestedProfile.getNecromancy());
-        playerProfile.get().setMagic(requestedProfile.getMagic());
-        playerProfile.get().setHerblore(requestedProfile.getHerblore());
-        playerProfile.get().setSummoning(requestedProfile.getSummoning());
-        playerProfile.get().setPrayer(requestedProfile.getPrayer());
+        applyProfileRequest(playerProfile.get(), requestedProfile);
 
         return Optional.of(playerProfileRepository.save(playerProfile.get()));
+    }
+
+    private void applyProfileRequest(
+            PlayerProfile profile, SaveProfileRequest request) {
+
+        profile.setRsn(request.getRsn().trim());
+        profile.setAttack(request.getAttack());
+        profile.setDefence(request.getDefence());
+        profile.setStrength(request.getStrength());
+        profile.setRanged(request.getRanged());
+        profile.setNecromancy(request.getNecromancy());
+        profile.setMagic(request.getMagic());
+        profile.setHerblore(request.getHerblore());
+        profile.setSummoning(request.getSummoning());
+        profile.setPrayer(request.getPrayer());
 
     }
 }
