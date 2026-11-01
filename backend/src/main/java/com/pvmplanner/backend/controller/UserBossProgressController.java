@@ -3,12 +3,11 @@ package com.pvmplanner.backend.controller;
 import com.pvmplanner.backend.dto.CreateProgressRequest;
 import com.pvmplanner.backend.model.UserBossProgress;
 import com.pvmplanner.backend.service.UserBossProgressService;
+import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.hibernate.exception.ConstraintViolationException;
 
 import java.util.List;
 import java.util.Optional;
