@@ -6,6 +6,7 @@ public class CreateProgressRequest {
     private int killCount;
     private boolean completed;
     private String confidence;
+    private Long playerProfileId;
 
     public CreateProgressRequest() {
     }
@@ -40,5 +41,13 @@ public class CreateProgressRequest {
 
     public void setConfidence(String confidence) {
         this.confidence = confidence;
+    }
+
+    public Long getPlayerProfileId() {
+        return playerProfileId;
+    }
+
+    public void setPlayerProfileId(Long playerProfileId) {
+        this.playerProfileId = playerProfileId;
     }
 }

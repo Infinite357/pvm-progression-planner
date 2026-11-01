@@ -1,10 +1,8 @@
 package com.pvmplanner.backend.controller;
 
 import com.pvmplanner.backend.dto.CreateProgressRequest;
-import com.pvmplanner.backend.model.Boss;
 import com.pvmplanner.backend.model.UserBossProgress;
-import com.pvmplanner.backend.repository.BossRepository;
-import com.pvmplanner.backend.repository.UserBossProgressRepository;
+import com.pvmplanner.backend.service.UserBossProgressService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,42 +13,20 @@ import java.util.Optional;
 @RequestMapping("/api/progress")
 public class UserBossProgressController {
 
-    private final UserBossProgressRepository progressRepository;
-    private final BossRepository bossRepository;
+    private final UserBossProgressService progressService;
 
-    public UserBossProgressController(UserBossProgressRepository progressRepository, BossRepository bossRepository) {
-        this.progressRepository = progressRepository;
-        this.bossRepository = bossRepository;
+    public UserBossProgressController(UserBossProgressService progressService) {
+        this.progressService = progressService;
     }
 
     @GetMapping
     public List<UserBossProgress> findAll() {
-        return progressRepository.findAll();
-    }
-
-
-    @PostMapping
-    public ResponseEntity<UserBossProgress> save(@RequestBody CreateProgressRequest request) {
-        Optional<Boss> boss = bossRepository.findById(request.getBossId());
-
-        if (boss.isPresent()) {
-            UserBossProgress progress = new UserBossProgress();
-
-            progress.setBoss(boss.get());
-            progress.setKillCount(request.getKillCount());
-            progress.setCompleted(request.isCompleted());
-            progress.setConfidence(request.getConfidence());
-
-            UserBossProgress savedProgress = progressRepository.save(progress);
-
-            return ResponseEntity.ok(savedProgress);
-        }
-        return ResponseEntity.notFound().build();
+        return progressService.findAll();
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<UserBossProgress> findById(@PathVariable Long id) {
-        Optional<UserBossProgress> userBossProgress = progressRepository.findById(id);
+        Optional<UserBossProgress> userBossProgress = progressService.findById(id);
 
         if (userBossProgress.isPresent()) {
             return ResponseEntity.ok(userBossProgress.get());
@@ -58,49 +34,66 @@ public class UserBossProgressController {
         return ResponseEntity.notFound().build();
     }
 
+    @PostMapping
+    public ResponseEntity<UserBossProgress> save(
+            @RequestBody CreateProgressRequest request) {
+
+        if (request.getBossId() == null || request.getPlayerProfileId() == null) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        Optional<UserBossProgress> progress =
+                progressService.createProgress(request);
+
+        if (progress.isPresent()) {
+            return ResponseEntity.ok(progress.get());
+        }
+
+        return ResponseEntity.notFound().build();
+    }
+
+
     @PutMapping("/{id}")
     public ResponseEntity<UserBossProgress> updateProgress(
             @PathVariable Long id,
             @RequestBody CreateProgressRequest request) {
 
-        Optional<UserBossProgress> userBossProgress = progressRepository.findById(id);
-
-        if (!userBossProgress.isPresent()) {
-            return ResponseEntity.notFound().build();
+        if (request.getBossId() == null || request.getPlayerProfileId() == null) {
+            return ResponseEntity.badRequest().build();
         }
 
-        Optional<Boss> boss = bossRepository.findById(request.getBossId());
+        Optional<UserBossProgress> updatedProgress =
+                progressService.updateProgress(id, request);
 
-        if (!boss.isPresent()) {
-            return ResponseEntity.notFound().build();
+        if (updatedProgress.isPresent()) {
+            return ResponseEntity.ok(updatedProgress.get());
         }
 
-        UserBossProgress progressToUpdate = userBossProgress.get();
-
-        progressToUpdate.setBoss(boss.get());
-        progressToUpdate.setKillCount(request.getKillCount());
-        progressToUpdate.setCompleted(request.isCompleted());
-        progressToUpdate.setConfidence(request.getConfidence());
-
-        UserBossProgress updatedProgress =
-                progressRepository.save(progressToUpdate);
-
-        return ResponseEntity.ok(updatedProgress);
+        return ResponseEntity.notFound().build();
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteById(@PathVariable Long id) {
-        Optional<UserBossProgress> userBossProgress = progressRepository.findById(id);
+        boolean deleted = progressService.deleteProgress(id);
 
-        if (!userBossProgress.isPresent()) {
-            return ResponseEntity.notFound().build();
+        if (deleted) {
+            return ResponseEntity.noContent().build();
         }
 
-        progressRepository.deleteById(id);
-
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.notFound().build();
     }
 
+    @GetMapping("/player/{playerProfileId}")
+    public List<UserBossProgress> findByPlayerProfileId(@PathVariable Long playerProfileId) {
+        return progressService.findByPlayerProfileId(playerProfileId);
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<String> handleIllegalArgument(
+            IllegalArgumentException exception) {
+
+        return ResponseEntity.badRequest().body(exception.getMessage());
+    }
 }
 
 

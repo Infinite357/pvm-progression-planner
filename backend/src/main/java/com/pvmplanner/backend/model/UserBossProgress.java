@@ -1,13 +1,17 @@
 package com.pvmplanner.backend.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 
 @Entity
+@Table(
+        name = "user_boss_progress",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "uk_progress_player_boss",
+                        columnNames = {"player_profile_id", "boss_id"}
+                )
+        }
+)
 public class UserBossProgress {
 
     @Id
@@ -68,5 +72,17 @@ public class UserBossProgress {
 
     public void setConfidence(String confidence) {
         this.confidence = confidence;
+    }
+
+    @ManyToOne
+    @JoinColumn(name = "player_profile_id")
+    private PlayerProfile playerProfile;
+
+    public void setPlayerProfile(PlayerProfile playerProfile) {
+        this.playerProfile = playerProfile;
+    }
+
+    public PlayerProfile getPlayerProfile() {
+        return playerProfile;
     }
 }
