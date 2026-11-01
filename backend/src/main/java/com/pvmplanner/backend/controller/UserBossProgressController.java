@@ -3,8 +3,12 @@ package com.pvmplanner.backend.controller;
 import com.pvmplanner.backend.dto.CreateProgressRequest;
 import com.pvmplanner.backend.model.UserBossProgress;
 import com.pvmplanner.backend.service.UserBossProgressService;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.hibernate.exception.ConstraintViolationException;
 
 import java.util.List;
 import java.util.Optional;
@@ -93,6 +97,36 @@ public class UserBossProgressController {
             IllegalArgumentException exception) {
 
         return ResponseEntity.badRequest().body(exception.getMessage());
+    }
+
+    @ExceptionHandler(com.pvmplanner.backend.exception.DuplicateProgressException.class)
+    public ResponseEntity<String> handleDuplicateProgress(
+            com.pvmplanner.backend.exception.DuplicateProgressException exception) {
+
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(exception.getMessage());
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<String> handleDataIntegrityViolation(
+            DataIntegrityViolationException exception) {
+
+        Throwable cause = exception;
+
+        while (cause != null) {
+            if (cause instanceof ConstraintViolationException violation
+                    && "uk_progress_player_boss".equals(
+                    violation.getConstraintName())) {
+
+                return ResponseEntity.status(HttpStatus.CONFLICT)
+                        .body("Progress already exists for this player and boss");
+            }
+
+            cause = cause.getCause();
+        }
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Unable to save progress due to a database constraint");
     }
 }
 

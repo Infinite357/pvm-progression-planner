@@ -52,7 +52,8 @@ public class UserBossProgressService {
                         request.getBossId());
 
         if (alreadyExists) {
-            throw new IllegalArgumentException("Progress already exists for this player and boss");
+            throw new com.pvmplanner.backend.exception.DuplicateProgressException(
+                    "Progress already exists for this player and boss");
         }
 
         UserBossProgress progress = new UserBossProgress();
@@ -86,7 +87,8 @@ public class UserBossProgressService {
                         id);
 
         if (alreadyExists) {
-            throw new IllegalArgumentException("Progress already exists for this player and boss");
+            throw new com.pvmplanner.backend.exception.DuplicateProgressException(
+                    "Progress already exists for this player and boss");
         }
 
         Optional<Boss> boss = bossRepository.findById(request.getBossId());
